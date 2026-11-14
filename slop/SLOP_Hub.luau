@@ -867,8 +867,8 @@ if game.PlaceId == PRISON_PLACE then
     local gamesPage = createPage("GAMES LIST")
 
     createTab("TELEPORTS", 1)
-    createTab("INFO", 2)
-    createTab("DOORS", 3)
+    createTab("DOORS", 2)
+    createTab("INFO", 3)
 
     -- GAMES LIST - zolty, na samym dole
     local gamesTab = createTab("GAMES LIST", 0, true)
@@ -1177,7 +1177,7 @@ if game.PlaceId == PRISON_PLACE then
 
             savedDoors = doors
             doors.Parent = doorsStorage
-            doorsStatus.Text = "doors moved to LocalDoorsStorage"
+            doorsStatus.Text = "doors deleted"
             doorsStatus.TextColor3 = GOOD
         else
             if savedDoors and savedDoors.Parent == doorsStorage then
@@ -1189,6 +1189,57 @@ if game.PlaceId == PRISON_PLACE then
                 doorsStatus.Text = "saved doors not found"
                 doorsStatus.TextColor3 = WARN
                 setDoorsToggle(true)
+            end
+        end
+    end)
+
+    -- FENCES
+    local fencesSection = section(doorsPage, "fences", 124, 116)
+
+    local fencesStatus = create("TextLabel", {
+        Size = UDim2.new(1, -16, 0, 36),
+        Position = UDim2.new(0, 8, 0, 68),
+        BackgroundTransparency = 1,
+        Text = "fences are solid",
+        TextColor3 = TEXT_OFF,
+        Font = FONT,
+        TextSize = 10,
+        TextWrapped = true,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Top
+    }, fencesSection)
+
+    local savedFences = nil
+    local savedFencesParent = nil
+    local setFencesToggle
+
+    setFencesToggle = toggle(fencesSection, "delete fences", 36, false, function(on)
+        if on then
+            local fences = workspace:FindFirstChild("Prison_Fences", true)
+
+            if not fences then
+                fencesStatus.Text = "workspace.Prison_Fences not found"
+                fencesStatus.TextColor3 = WARN
+                setFencesToggle(false)
+                return
+            end
+
+            savedFences = fences
+            savedFencesParent = fences.Parent
+            fences.Parent = doorsStorage
+            fencesStatus.Text = "fences deleted"
+            fencesStatus.TextColor3 = GOOD
+        else
+            if savedFences and savedFences.Parent == doorsStorage then
+                savedFences.Parent = savedFencesParent or workspace
+                savedFences = nil
+                savedFencesParent = nil
+                fencesStatus.Text = "fences restored"
+                fencesStatus.TextColor3 = TEXT_OFF
+            else
+                fencesStatus.Text = "saved fences not found"
+                fencesStatus.TextColor3 = WARN
+                setFencesToggle(true)
             end
         end
     end)
