@@ -10,14 +10,22 @@ local TeleportService = game:GetService("TeleportService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- executor ubija skrypt przy teleporcie. Wrzuc tu URL do tego pliku
--- (raw github / loadstring.net), to hub odpali sie sam w nowej grze.
-local AUTO_RELOAD_URL = ""
+-- executor ubija skrypt przy teleporcie. Loader ustawia to sam,
+-- ale mozesz tez wpisac URL recznie (raw github / loadstring.net).
+local AUTO_RELOAD_URL = (getgenv and getgenv().SLOP_LOADER_URL)
+    or _G.SLOP_LOADER_URL
+    or ""
+
+if AUTO_RELOAD_URL ~= "" then
+    local env = (getgenv and getgenv()) or _G
+    env.SLOP_LOADER_URL = AUTO_RELOAD_URL
+end
 
 -- SLOP GAME SUPPORT SYSTEM
 local EGG_PLACE = 99838015219458
 local PRISON_PLACE = 155615604
 local SCOOTER_PLACE = 107344344488571
+local RIVERS_PLACE = 87043539966079
 
 local SUPPORTED_GAMES = {
     {
@@ -34,6 +42,11 @@ local SUPPORTED_GAMES = {
         PlaceId = SCOOTER_PLACE,
         Name = "Steal A Scooter",
         Icon = "rbxthumb://type=PlaceIcon&id=" .. SCOOTER_PLACE .. "&w=150&h=150"
+    },
+    {
+        PlaceId = RIVERS_PLACE,
+        Name = "Cross Rivers for Animals",
+        Icon = "rbxthumb://type=PlaceIcon&id=" .. RIVERS_PLACE .. "&w=150&h=150"
     }
 }
 
@@ -1764,6 +1777,7 @@ end
 -- STEAL EGGS FROM TSUNAMI
 -- =========================================================
 
+if game.PlaceId == EGG_PLACE then
 -- REMOVE OLD GUI
 local old = playerGui:FindFirstChild("SLOP")
 if old then
@@ -2528,3 +2542,578 @@ main.Size = UDim2.fromOffset(0, 0)
 tween(main, 0.35, {
     Size = originalSize
 })
+
+return end
+
+-- =========================================================
+-- CROSS RIVERS FOR ANIMALS
+-- =========================================================
+
+if game.PlaceId == RIVERS_PLACE then
+    local function corner(obj, radius)
+        local c = Instance.new("UICorner")
+        c.CornerRadius = UDim.new(0, radius or 7)
+        c.Parent = obj
+    end
+
+    local function makeLabel(parent, text, size, color)
+        local label = Instance.new("TextLabel")
+        label.BackgroundTransparency = 1
+        label.Text = text
+        label.TextColor3 = color or Color3.new(1, 1, 1)
+        label.TextSize = size or 13
+        label.Font = Enum.Font.Gotham
+        label.Parent = parent
+        return label
+    end
+
+    local old = playerGui:FindFirstChild("SLOP")
+    if old then
+        old:Destroy()
+    end
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "SLOP"
+    gui.ResetOnSpawn = false
+    gui.Parent = playerGui
+
+    -- MAIN WINDOW
+    local main = Instance.new("Frame")
+    main.Size = UDim2.fromOffset(440, 360)
+    main.Position = UDim2.new(0.5, -220, 0.5, -180)
+    main.BackgroundColor3 = Color3.fromRGB(19, 19, 25)
+    main.BorderSizePixel = 0
+    main.ClipsDescendants = true
+    main.Parent = gui
+    corner(main, 10)
+
+    -- TOP BAR
+    local top = Instance.new("Frame")
+    top.Size = UDim2.new(1, 0, 0, 43)
+    top.BackgroundColor3 = Color3.fromRGB(29, 29, 37)
+    top.BorderSizePixel = 0
+    top.Parent = main
+    corner(top, 10)
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, -240, 1, 0)
+    title.Position = UDim2.fromOffset(14, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "SLOP"
+    title.TextColor3 = Color3.fromRGB(255, 55, 55)
+    title.TextSize = 23
+    title.Font = Enum.Font.GothamBold
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = top
+
+    local subtitle = Instance.new("TextLabel")
+    subtitle.Position = UDim2.fromOffset(200, 0)
+    subtitle.Size = UDim2.fromOffset(152, 43)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Text = "cross rivers for animals"
+    subtitle.TextColor3 = Color3.fromRGB(130, 130, 150)
+    subtitle.TextSize = 10
+    subtitle.Font = Enum.Font.Gotham
+    subtitle.TextXAlignment = Enum.TextXAlignment.Right
+    subtitle.Parent = top
+
+    local minimize = Instance.new("TextButton")
+    minimize.Size = UDim2.fromOffset(35, 30)
+    minimize.Position = UDim2.new(1, -78, 0, 6)
+    minimize.BackgroundColor3 = Color3.fromRGB(55, 55, 65)
+    minimize.Text = "-"
+    minimize.TextColor3 = Color3.new(1, 1, 1)
+    minimize.TextSize = 23
+    minimize.Font = Enum.Font.GothamBold
+    minimize.Parent = top
+    corner(minimize, 5)
+
+    local close = Instance.new("TextButton")
+    close.Size = UDim2.fromOffset(35, 30)
+    close.Position = UDim2.new(1, -39, 0, 6)
+    close.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+    close.Text = "X"
+    close.TextColor3 = Color3.new(1, 1, 1)
+    close.Font = Enum.Font.GothamBold
+    close.TextSize = 17
+    close.Parent = top
+    corner(close, 5)
+
+    close.MouseButton1Click:Connect(function()
+        gui:Destroy()
+    end)
+
+    -- SIDEBAR
+    local sidebar = Instance.new("Frame")
+    sidebar.Position = UDim2.fromOffset(0, 48)
+    sidebar.Size = UDim2.new(0, 112, 1, -48)
+    sidebar.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+    sidebar.BorderSizePixel = 0
+    sidebar.Parent = main
+
+    local tab = Instance.new("TextButton")
+    tab.Size = UDim2.new(1, -12, 0, 38)
+    tab.Position = UDim2.fromOffset(6, 8)
+    tab.BackgroundColor3 = Color3.fromRGB(175, 40, 40)
+    tab.Text = "TELEPORT"
+    tab.TextColor3 = Color3.new(1, 1, 1)
+    tab.TextSize = 13
+    tab.Font = Enum.Font.GothamBold
+    tab.BorderSizePixel = 0
+    tab.Parent = sidebar
+    corner(tab, 6)
+
+    local gamesTab = Instance.new("TextButton")
+    gamesTab.Size = UDim2.new(1, -12, 0, 38)
+    gamesTab.AnchorPoint = Vector2.new(0, 1)
+    gamesTab.Position = UDim2.new(0, 6, 1, -8)
+    gamesTab.BackgroundColor3 = YELLOW
+    gamesTab.Text = "GAMES LIST"
+    gamesTab.TextColor3 = Color3.new(1, 1, 1)
+    gamesTab.TextSize = 11
+    gamesTab.Font = Enum.Font.GothamBold
+    gamesTab.BorderSizePixel = 0
+    gamesTab.Parent = sidebar
+    corner(gamesTab, 6)
+
+    -- CONTENT
+    local content = Instance.new("Frame")
+    content.Position = UDim2.fromOffset(120, 52)
+    content.Size = UDim2.new(1, -130, 1, -62)
+    content.BackgroundTransparency = 1
+    content.Parent = main
+
+    local teleportPage = Instance.new("Frame")
+    teleportPage.Name = "Teleport"
+    teleportPage.Size = UDim2.fromScale(1, 1)
+    teleportPage.BackgroundTransparency = 1
+    teleportPage.Parent = content
+
+    local gamesPage = Instance.new("Frame")
+    gamesPage.Name = "GamesList"
+    gamesPage.Size = UDim2.fromScale(1, 1)
+    gamesPage.BackgroundTransparency = 1
+    gamesPage.Visible = false
+    gamesPage.Parent = content
+
+    local heading = Instance.new("TextLabel")
+    heading.Size = UDim2.new(1, -200, 0, 30)
+    heading.BackgroundTransparency = 1
+    heading.Text = "FIELD EGGS"
+    heading.TextColor3 = Color3.fromRGB(255, 60, 60)
+    heading.TextSize = 18
+    heading.Font = Enum.Font.GothamBold
+    heading.TextXAlignment = Enum.TextXAlignment.Left
+    heading.TextTruncate = Enum.TextTruncate.AtEnd
+    heading.Parent = teleportPage
+
+    local refreshLabel = Instance.new("TextLabel")
+    refreshLabel.Size = UDim2.fromOffset(80, 25)
+    refreshLabel.Position = UDim2.new(1, -200, 0, 4)
+    refreshLabel.BackgroundTransparency = 1
+    refreshLabel.Text = "AUTO: 1s"
+    refreshLabel.TextColor3 = Color3.fromRGB(130, 220, 130)
+    refreshLabel.TextSize = 11
+    refreshLabel.Font = Enum.Font.GothamBold
+    refreshLabel.Parent = teleportPage
+
+    local refreshButton = Instance.new("TextButton")
+    refreshButton.Size = UDim2.fromOffset(80, 27)
+    refreshButton.Position = UDim2.new(1, -85, 0, 2)
+    refreshButton.BackgroundColor3 = Color3.fromRGB(55, 55, 65)
+    refreshButton.Text = "REFRESH"
+    refreshButton.TextColor3 = Color3.new(1, 1, 1)
+    refreshButton.TextSize = 11
+    refreshButton.Font = Enum.Font.GothamBold
+    refreshButton.BorderSizePixel = 0
+    refreshButton.Parent = teleportPage
+    corner(refreshButton, 5)
+
+    -- SCROLL
+    local scroll = Instance.new("ScrollingFrame")
+    scroll.Position = UDim2.fromOffset(0, 38)
+    scroll.Size = UDim2.new(1, 0, 1, -42)
+    scroll.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
+    scroll.BorderSizePixel = 0
+    scroll.ScrollBarThickness = 5
+    scroll.ScrollBarImageColor3 = Color3.fromRGB(190, 55, 55)
+    scroll.CanvasSize = UDim2.new()
+    scroll.Parent = teleportPage
+    corner(scroll, 7)
+
+    local padding = Instance.new("UIPadding")
+    padding.PaddingTop = UDim.new(0, 7)
+    padding.PaddingLeft = UDim.new(0, 7)
+    padding.PaddingRight = UDim.new(0, 7)
+    padding.PaddingBottom = UDim.new(0, 7)
+    padding.Parent = scroll
+
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0, 6)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Parent = scroll
+
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        scroll.CanvasSize = UDim2.fromOffset(
+            0,
+            layout.AbsoluteContentSize.Y + 15
+        )
+    end)
+
+    -- GAMES LIST PAGE
+    local gamesHeading = Instance.new("TextLabel")
+    gamesHeading.Size = UDim2.new(1, 0, 0, 30)
+    gamesHeading.BackgroundTransparency = 1
+    gamesHeading.Text = "GAMES LIST"
+    gamesHeading.TextColor3 = YELLOW
+    gamesHeading.TextSize = 18
+    gamesHeading.Font = Enum.Font.GothamBold
+    gamesHeading.TextXAlignment = Enum.TextXAlignment.Left
+    gamesHeading.Parent = gamesPage
+
+    local gamesSubtitle = Instance.new("TextLabel")
+    gamesSubtitle.Position = UDim2.fromOffset(0, 28)
+    gamesSubtitle.Size = UDim2.new(1, 0, 0, 20)
+    gamesSubtitle.BackgroundTransparency = 1
+    gamesSubtitle.Text = "Pick a game and press JOIN"
+    gamesSubtitle.TextColor3 = Color3.fromRGB(130, 130, 150)
+    gamesSubtitle.TextSize = 11
+    gamesSubtitle.Font = Enum.Font.Gotham
+    gamesSubtitle.TextXAlignment = Enum.TextXAlignment.Left
+    gamesSubtitle.Parent = gamesPage
+
+    buildGamesList(gamesPage, 54)
+
+    local function showPage(name)
+        teleportPage.Visible = name == "TELEPORT"
+        gamesPage.Visible = name == "GAMES LIST"
+
+        tab.BackgroundColor3 = name == "TELEPORT"
+            and Color3.fromRGB(175, 40, 40)
+            or Color3.fromRGB(38, 38, 48)
+    end
+
+    tab.MouseButton1Click:Connect(function()
+        showPage("TELEPORT")
+    end)
+
+    gamesTab.MouseButton1Click:Connect(function()
+        showPage("GAMES LIST")
+    end)
+
+    showPage("TELEPORT")
+
+    -- COLLAPSE / EXPAND
+    local minimized = false
+    local normalSize = UDim2.fromOffset(440, 360)
+    local minimizedSize = UDim2.fromOffset(440, 43)
+
+    minimize.MouseButton1Click:Connect(function()
+        minimized = not minimized
+
+        if minimized then
+            sidebar.Visible = false
+            content.Visible = false
+            main.Size = minimizedSize
+            minimize.Text = "+"
+        else
+            main.Size = normalSize
+            sidebar.Visible = true
+            content.Visible = true
+            minimize.Text = "-"
+        end
+    end)
+
+    -- DRAG WINDOW
+    local dragging = false
+    local dragStart
+    local startPosition
+
+    top.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPosition = main.Position
+        end
+    end)
+
+    UIS.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+
+            main.Position = UDim2.new(
+                startPosition.X.Scale,
+                startPosition.X.Offset + delta.X,
+                startPosition.Y.Scale,
+                startPosition.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    -- FIND MODELS INSIDE NESTED FOLDERS
+    local function getModels(folder)
+        local result = {}
+
+        for _, obj in ipairs(folder:GetChildren()) do
+            if obj:IsA("Model") then
+                table.insert(result, obj)
+            elseif obj:IsA("Folder") then
+                for _, model in ipairs(getModels(obj)) do
+                    table.insert(result, model)
+                end
+            end
+        end
+
+        table.sort(result, function(a, b)
+            return a.Name:lower() < b.Name:lower()
+        end)
+
+        return result
+    end
+
+    local function clearList()
+        for _, child in ipairs(scroll:GetChildren()) do
+            if child:IsA("Frame") or child.Name == "SpawnButton" then
+                child:Destroy()
+            end
+        end
+    end
+
+    -- TP TO SPAWN
+    local function createSpawnButton()
+        local spawnButton = Instance.new("TextButton")
+        spawnButton.Name = "SpawnButton"
+        spawnButton.Size = UDim2.new(1, -5, 0, 42)
+        spawnButton.BackgroundColor3 = Color3.fromRGB(175, 40, 40)
+        spawnButton.BorderSizePixel = 0
+        spawnButton.Text = "TP TO SPAWN"
+        spawnButton.TextColor3 = Color3.new(1, 1, 1)
+        spawnButton.TextSize = 14
+        spawnButton.Font = Enum.Font.GothamBold
+        spawnButton.LayoutOrder = 0
+        spawnButton.Parent = scroll
+        corner(spawnButton, 6)
+
+        spawnButton.MouseButton1Click:Connect(function()
+            local character = player.Character
+            local root = character and character:FindFirstChild("HumanoidRootPart")
+
+            if root then
+                root.CFrame = CFrame.new(-48, 5.5, 13.25)
+            end
+        end)
+    end
+
+    -- EGG ROW
+    local function createEggRow(model, order)
+        local row = Instance.new("Frame")
+        row.Size = UDim2.new(1, -5, 0, 39)
+        row.BackgroundColor3 = Color3.fromRGB(43, 43, 52)
+        row.BorderSizePixel = 0
+        row.LayoutOrder = order
+        row.Parent = scroll
+        corner(row, 5)
+
+        local name = makeLabel(
+            row,
+            model.Name,
+            12,
+            Color3.fromRGB(235, 235, 235)
+        )
+
+        name.Position = UDim2.fromOffset(10, 0)
+        name.Size = UDim2.new(1, -90, 1, 0)
+        name.TextXAlignment = Enum.TextXAlignment.Left
+        name.TextTruncate = Enum.TextTruncate.AtEnd
+
+        local tp = Instance.new("TextButton")
+        tp.Size = UDim2.fromOffset(58, 27)
+        tp.Position = UDim2.new(1, -66, 0.5, -13)
+        tp.BackgroundColor3 = Color3.fromRGB(180, 43, 43)
+        tp.Text = "TP"
+        tp.TextColor3 = Color3.new(1, 1, 1)
+        tp.TextSize = 13
+        tp.Font = Enum.Font.GothamBold
+        tp.BorderSizePixel = 0
+        tp.Parent = row
+        corner(tp, 5)
+
+        tp.MouseButton1Click:Connect(function()
+            if not model:IsDescendantOf(workspace) then
+                return
+            end
+
+            local character = player.Character
+            local root = character and character:FindFirstChild("HumanoidRootPart")
+
+            if not root then
+                return
+            end
+
+            local success, pivot = pcall(function()
+                return model:GetPivot()
+            end)
+
+            if not success then
+                warn("SLOP: Could not get model pivot:", model.Name)
+                return
+            end
+
+            root.CFrame = pivot + Vector3.new(0, 5, 0)
+        end)
+    end
+
+    -- FIELD EGGS
+    local expanded = {}
+    local lastSignature = nil
+
+    local function collectFolders()
+        local fieldEggs = workspace:FindFirstChild("FieldEggs")
+
+        if not fieldEggs then
+            return nil
+        end
+
+        local folders = {}
+
+        for _, obj in ipairs(fieldEggs:GetChildren()) do
+            if obj:IsA("Folder") then
+                table.insert(folders, obj)
+            end
+        end
+
+        table.sort(folders, function(a, b)
+            return a.Name:lower() < b.Name:lower()
+        end)
+
+        local entries = {}
+        local signature = {}
+
+        for _, folder in ipairs(folders) do
+            local models = getModels(folder)
+
+            table.insert(entries, {
+                folder = folder,
+                models = models
+            })
+
+            table.insert(signature, folder.Name)
+
+            for _, model in ipairs(models) do
+                table.insert(signature, model.Name)
+            end
+        end
+
+        return entries, table.concat(signature, "\0")
+    end
+
+    local function refresh(force)
+        local entries, signature = collectFolders()
+
+        if not entries then
+            if lastSignature ~= "<missing>" then
+                lastSignature = "<missing>"
+                clearList()
+                createSpawnButton()
+                heading.Text = "FIELD EGGS NOT FOUND"
+            end
+
+            return
+        end
+
+        if not force and signature == lastSignature then
+            return
+        end
+
+        lastSignature = signature
+        clearList()
+        createSpawnButton()
+        heading.Text = "FIELD EGGS"
+
+        local order = 1
+
+        for _, entry in ipairs(entries) do
+            local folder = entry.folder
+            local models = entry.models
+
+            order += 1
+
+            local category = Instance.new("Frame")
+            category.Size = UDim2.new(1, -5, 0, 38)
+            category.BackgroundColor3 = Color3.fromRGB(48, 48, 59)
+            category.BorderSizePixel = 0
+            category.LayoutOrder = order
+            category.Parent = scroll
+            corner(category, 6)
+
+            local button = Instance.new("TextButton")
+            button.Size = UDim2.new(1, 0, 1, 0)
+            button.BackgroundTransparency = 1
+            button.Text = (expanded[folder.Name] and "▼  " or "▶  ")
+                .. folder.Name .. "     (" .. #models .. ")"
+            button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            button.TextSize = 13
+            button.Font = Enum.Font.GothamBold
+            button.TextXAlignment = Enum.TextXAlignment.Left
+            button.Parent = category
+
+            local leftPadding = Instance.new("UIPadding")
+            leftPadding.PaddingLeft = UDim.new(0, 10)
+            leftPadding.Parent = button
+
+            button.MouseButton1Click:Connect(function()
+                expanded[folder.Name] = not expanded[folder.Name]
+                refresh(true)
+            end)
+
+            if expanded[folder.Name] then
+                for _, model in ipairs(models) do
+                    order += 1
+                    createEggRow(model, order)
+                end
+            end
+        end
+
+        if #entries == 0 then
+            order += 1
+
+            local empty = Instance.new("Frame")
+            empty.Size = UDim2.new(1, -5, 0, 40)
+            empty.BackgroundTransparency = 1
+            empty.LayoutOrder = order
+            empty.Parent = scroll
+
+            local label = makeLabel(
+                empty,
+                "No folders found in FieldEggs",
+                12,
+                Color3.fromRGB(150, 150, 150)
+            )
+
+            label.Size = UDim2.new(1, 0, 1, 0)
+        end
+    end
+
+    refreshButton.MouseButton1Click:Connect(function()
+        refresh(true)
+    end)
+
+    refresh(true)
+
+    -- AUTO REFRESH EVERY SECOND (rebuild only when something changed)
+    task.spawn(function()
+        while gui.Parent do
+            task.wait(1)
+
+            if gui.Parent then
+                refresh(false)
+            end
+        end
+    end)
+end
