@@ -6,6 +6,7 @@ local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TeleportService = game:GetService("TeleportService")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -861,14 +862,16 @@ if game.PlaceId == PRISON_PLACE then
         return tab
     end
 
-    local movementPage = createPage("TELEPORTS")
+    local movementPage = createPage("MOVEMENT")
+    local teleportPage = createPage("TELEPORTS")
     local infoPage = createPage("INFO")
     local doorsPage = createPage("DOORS")
     local gamesPage = createPage("GAMES LIST")
 
-    createTab("TELEPORTS", 1)
-    createTab("DOORS", 2)
-    createTab("INFO", 3)
+    createTab("MOVEMENT", 1)
+    createTab("TELEPORTS", 2)
+    createTab("DOORS", 3)
+    createTab("INFO", 4)
 
     -- GAMES LIST - zolty, na samym dole
     local gamesTab = createTab("GAMES LIST", 0, true)
@@ -876,11 +879,11 @@ if game.PlaceId == PRISON_PLACE then
     gamesTab.button.Position = UDim2.new(0, 4, 1, -6)
     gamesTab.bar.Visible = false
 
-    activeTab = "TELEPORTS"
-    switchPage("TELEPORTS")
+    activeTab = "MOVEMENT"
+    switchPage("MOVEMENT")
 
     for tabName, tab in pairs(tabs) do
-        paintTab(tab, tabName == "TELEPORTS", false)
+        paintTab(tab, tabName == "MOVEMENT", false)
     end
 
     local function section(parent, title, y, height)
@@ -1043,8 +1046,317 @@ if game.PlaceId == PRISON_PLACE then
         end
     end
 
+    local function slider(parent, title, y, min, max, step, initial, callback)
+        create("TextLabel", {
+            Size = UDim2.new(1, -80, 0, 14),
+            Position = UDim2.new(0, 8, 0, y),
+            BackgroundTransparency = 1,
+            Text = title,
+            TextColor3 = TEXT,
+            Font = FONT,
+            TextSize = 10,
+            TextXAlignment = Enum.TextXAlignment.Left
+        }, parent)
+
+        local valueLabel = create("TextLabel", {
+            Size = UDim2.new(0, 64, 0, 14),
+            Position = UDim2.new(1, -72, 0, y),
+            BackgroundTransparency = 1,
+            Text = "",
+            TextColor3 = ACCENT,
+            Font = FONT,
+            TextSize = 10,
+            TextXAlignment = Enum.TextXAlignment.Right
+        }, parent)
+
+        local track = create("Frame", {
+            Size = UDim2.new(1, -16, 0, 4),
+            Position = UDim2.new(0, 8, 0, y + 20),
+            BackgroundColor3 = DARK,
+            BorderSizePixel = 0
+        }, parent)
+
+        create("UIStroke", {
+            Color = INLINE,
+            Thickness = 1
+        }, track)
+
+        local fill = create("Frame", {
+            Size = UDim2.new(0, 0, 1, 0),
+            BackgroundColor3 = ACCENT,
+            BorderSizePixel = 0
+        }, track)
+
+        local knob = create("Frame", {
+            Size = UDim2.new(0, 8, 0, 8),
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.new(0, 0, 0.5, 0),
+            BackgroundColor3 = TEXT,
+            BorderSizePixel = 0,
+            ZIndex = 2
+        }, track)
+
+        local value = initial
+
+        local function format(v)
+            if step >= 1 then
+                return tostring(math.floor(v + 0.5))
+            end
+
+            return string.format("%.1f", v)
+        end
+
+        local function setValue(v, fire)
+            v = math.clamp(v, min, max)
+
+            if step > 0 then
+                v = math.floor((v - min) / step + 0.5) * step + min
+                v = math.clamp(v, min, max)
+            end
+
+            value = v
+
+            local alpha = max > min and (v - min) / (max - min) or 0
+            fill.Size = UDim2.new(alpha, 0, 1, 0)
+            knob.Position = UDim2.new(alpha, 0, 0.5, 0)
+            valueLabel.Text = format(v)
+
+            if fire and callback then
+                callback(v)
+            end
+        end
+
+        local dragging = false
+
+        local function updateFromInput(input)
+            local relative = (input.Position.X - track.AbsolutePosition.X)
+                / track.AbsoluteSize.X
+
+            setValue(min + math.clamp(relative, 0, 1) * (max - min), true)
+        end
+
+        track.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1
+                or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                updateFromInput(input)
+            end
+        end)
+
+        UIS.InputChanged:Connect(function(input)
+            if not dragging then
+                return
+            end
+
+            if input.UserInputType == Enum.UserInputType.MouseMovement
+                or input.UserInputType == Enum.UserInputType.Touch then
+                updateFromInput(input)
+            end
+        end)
+
+        UIS.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1
+                or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+            end
+        end)
+
+        setValue(initial, false)
+
+        return setValue, function()
+            return value
+        end
+    end
+
+    -- MOVEMENT
+    local function getHumanoid()
+        local character = player.Character
+
+        if not character then
+            return nil
+        end
+
+        return character:FindFirstChildOfClass("Humanoid")
+    end
+
+    local walkSpeed = 16
+
+    local speedSection = section(movementPage, "walkspeed", 0, 92)
+
+    local currentSpeed = getHumanoid()
+
+    if currentSpeed and currentSpeed.WalkSpeed > 0 then
+        walkSpeed = currentSpeed.WalkSpeed
+    end
+
+    slider(speedSection, "speed", 32, 16, 300, 1, walkSpeed, function(v)
+        walkSpeed = v
+
+        local humanoid = getHumanoid()
+
+        if humanoid then
+            humanoid.WalkSpeed = v
+        end
+    end)
+
+    player.CharacterAdded:Connect(function(character)
+        local humanoid = character:WaitForChild("Humanoid")
+
+        if humanoid then
+            humanoid.WalkSpeed = walkSpeed
+        end
+    end)
+
+    -- FLY
+    local flySpeed = 50
+    local flying = false
+    local flyConnection = nil
+    local flyVelocity = nil
+    local flyGyro = nil
+
+    local function stopFly()
+        flying = false
+
+        if flyConnection then
+            flyConnection:Disconnect()
+            flyConnection = nil
+        end
+
+        if flyVelocity then
+            flyVelocity:Destroy()
+            flyVelocity = nil
+        end
+
+        if flyGyro then
+            flyGyro:Destroy()
+            flyGyro = nil
+        end
+
+        local humanoid = getHumanoid()
+
+        if humanoid then
+            humanoid.PlatformStand = false
+        end
+    end
+
+    local function startFly()
+        stopFly()
+
+        local character = player.Character
+        local root = character and character:FindFirstChild("HumanoidRootPart")
+
+        if not root then
+            return
+        end
+
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+        if humanoid then
+            humanoid.PlatformStand = true
+        end
+
+        flying = true
+
+        local velocity = Instance.new("BodyVelocity")
+        velocity.Name = "SLOP_FlyVelocity"
+        velocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+        velocity.Velocity = Vector3.zero
+        velocity.Parent = root
+
+        local gyro = Instance.new("BodyGyro")
+        gyro.Name = "SLOP_FlyGyro"
+        gyro.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
+        gyro.P = 2500
+        gyro.D = 250
+        gyro.CFrame = root.CFrame
+        gyro.Parent = root
+
+        flyVelocity = velocity
+        flyGyro = gyro
+
+        flyConnection = RunService.RenderStepped:Connect(function()
+            local camera = workspace.CurrentCamera
+
+            if not flying or not camera or not root.Parent then
+                return
+            end
+
+            local direction = Vector3.zero
+
+            if UIS:IsKeyDown(Enum.KeyCode.W) then
+                direction = direction + camera.CFrame.LookVector
+            end
+
+            if UIS:IsKeyDown(Enum.KeyCode.S) then
+                direction = direction - camera.CFrame.LookVector
+            end
+
+            if UIS:IsKeyDown(Enum.KeyCode.D) then
+                direction = direction + camera.CFrame.RightVector
+            end
+
+            if UIS:IsKeyDown(Enum.KeyCode.A) then
+                direction = direction - camera.CFrame.RightVector
+            end
+
+            if UIS:IsKeyDown(Enum.KeyCode.Space) then
+                direction = direction + Vector3.new(0, 1, 0)
+            end
+
+            if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then
+                direction = direction - Vector3.new(0, 1, 0)
+            end
+
+            if direction.Magnitude > 0 then
+                direction = direction.Unit * flySpeed
+            end
+
+            velocity.Velocity = direction
+            gyro.CFrame = camera.CFrame
+        end)
+    end
+
+    local flySection = section(movementPage, "fly", 100, 116)
+
+    local setFlyToggle = toggle(flySection, "enable fly", 36, false, function(on)
+        if on then
+            startFly()
+        else
+            stopFly()
+        end
+    end)
+
+    slider(flySection, "fly speed", 66, 10, 300, 1, flySpeed, function(v)
+        flySpeed = v
+    end)
+
+    player.CharacterAdded:Connect(function()
+        stopFly()
+
+        if setFlyToggle then
+            setFlyToggle(false)
+        end
+    end)
+
+    gui.Destroying:Connect(function()
+        stopFly()
+    end)
+
+    local flyNote = section(movementPage, "fly controls", 224, 50)
+
+    create("TextLabel", {
+        Size = UDim2.new(1, -16, 0, 14),
+        Position = UDim2.new(0, 8, 0, 33),
+        BackgroundTransparency = 1,
+        Text = "WASD move // space up // left ctrl down",
+        TextColor3 = TEXT_OFF,
+        Font = FONT,
+        TextSize = 10,
+        TextXAlignment = Enum.TextXAlignment.Left
+    }, flyNote)
+
     -- TELEPORTS
-    local locations = section(movementPage, "locations", 0, 164)
+    local locations = section(teleportPage, "locations", 0, 164)
 
     local function teleportTo(cf)
         local character = player.Character or player.CharacterAdded:Wait()
@@ -1094,7 +1406,7 @@ if game.PlaceId == PRISON_PLACE then
         0, 0, 1
     ))
 
-    local note = section(movementPage, "note", 172, 50)
+    local note = section(teleportPage, "note", 172, 50)
 
     create("TextLabel", {
         Size = UDim2.new(1, -16, 0, 14),
@@ -1114,7 +1426,7 @@ if game.PlaceId == PRISON_PLACE then
         Size = UDim2.new(1, -16, 0, 60),
         Position = UDim2.new(0, 8, 0, 34),
         BackgroundTransparency = 1,
-        Text = "SLOP hub // prison life\ncustom teleports, door control and game list\nakiri style ui",
+        Text = "SLOP hub // prison life\nmovement, teleports, doors, fences and game list\nakiri style ui",
         TextColor3 = TEXT_OFF,
         Font = FONT,
         TextSize = 10,
