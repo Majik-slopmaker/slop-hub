@@ -111,7 +111,7 @@ local function buildGamesList(parent, topInset)
     padding.Parent = list
 
     local layout = Instance.new("UIListLayout")
-    layout.Padding = UDim.new(0, 7)
+    layout.Padding = UDim.new(0, 6)
     layout.SortOrder = Enum.SortOrder.LayoutOrder
     layout.Parent = list
 
@@ -120,7 +120,7 @@ local function buildGamesList(parent, topInset)
 
         local card = Instance.new("Frame")
         card.Name = "Game_" .. tostring(gameInfo.PlaceId)
-        card.Size = UDim2.new(1, -4, 0, 68)
+        card.Size = UDim2.new(1, -4, 0, 50)
         card.BackgroundColor3 = Color3.fromRGB(40, 38, 57)
         card.BorderSizePixel = 0
         card.LayoutOrder = index
@@ -128,8 +128,8 @@ local function buildGamesList(parent, topInset)
         Instance.new("UICorner", card).CornerRadius = UDim.new(0, 8)
 
         local icon = Instance.new("ImageLabel")
-        icon.Position = UDim2.fromOffset(9, 11)
-        icon.Size = UDim2.fromOffset(46, 46)
+        icon.Position = UDim2.fromOffset(8, 8)
+        icon.Size = UDim2.fromOffset(34, 34)
         icon.BackgroundColor3 = Color3.fromRGB(23, 23, 34)
         icon.BorderSizePixel = 0
         icon.Image = gameInfo.Icon
@@ -138,20 +138,20 @@ local function buildGamesList(parent, topInset)
         Instance.new("UICorner", icon).CornerRadius = UDim.new(0, 7)
 
         local nameLabel = Instance.new("TextLabel")
-        nameLabel.Position = UDim2.fromOffset(66, 11)
-        nameLabel.Size = UDim2.new(1, -146, 0, 20)
+        nameLabel.Position = UDim2.fromOffset(50, 6)
+        nameLabel.Size = UDim2.new(1, -120, 0, 16)
         nameLabel.BackgroundTransparency = 1
         nameLabel.Text = gameInfo.Name
         nameLabel.TextColor3 = Color3.fromRGB(235, 230, 255)
         nameLabel.Font = Enum.Font.GothamBold
-        nameLabel.TextSize = 13
+        nameLabel.TextSize = 12
         nameLabel.TextXAlignment = Enum.TextXAlignment.Left
         nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
         nameLabel.Parent = card
 
         local idLabel = Instance.new("TextLabel")
-        idLabel.Position = UDim2.fromOffset(66, 31)
-        idLabel.Size = UDim2.new(1, -146, 0, 16)
+        idLabel.Position = UDim2.fromOffset(50, 23)
+        idLabel.Size = UDim2.new(1, -120, 0, 14)
         idLabel.BackgroundTransparency = 1
         idLabel.Text = "Place ID: " .. tostring(gameInfo.PlaceId)
         idLabel.TextColor3 = Color3.fromRGB(145, 145, 165)
@@ -163,15 +163,15 @@ local function buildGamesList(parent, topInset)
         local joinButton = Instance.new("TextButton")
         joinButton.Name = "JoinButton"
         joinButton.AnchorPoint = Vector2.new(1, 0.5)
-        joinButton.Position = UDim2.new(1, -9, 0.5, 0)
-        joinButton.Size = UDim2.fromOffset(64, 30)
+        joinButton.Position = UDim2.new(1, -8, 0.5, 0)
+        joinButton.Size = UDim2.fromOffset(58, 26)
         joinButton.BackgroundColor3 = here and Color3.fromRGB(52, 50, 62) or YELLOW
         joinButton.Text = here and "IN GAME" or "JOIN"
         joinButton.TextColor3 = here
             and Color3.fromRGB(140, 140, 160)
             or Color3.fromRGB(28, 22, 4)
         joinButton.Font = Enum.Font.GothamBold
-        joinButton.TextSize = 11
+        joinButton.TextSize = 10
         joinButton.BorderSizePixel = 0
         joinButton.AutoButtonColor = false
         joinButton.Parent = card
@@ -299,7 +299,7 @@ if not currentGameSupported then
     subtitle.Position = UDim2.fromOffset(22, 91)
     subtitle.Size = UDim2.new(1, -44, 0, 22)
     subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Join one of the games supported by SLOP."
+    subtitle.Text = "Join one of the " .. tostring(#SUPPORTED_GAMES) .. " games supported by SLOP."
     subtitle.TextColor3 = Color3.fromRGB(145, 145, 165)
     subtitle.Font = Enum.Font.Gotham
     subtitle.TextSize = 12
@@ -327,7 +327,7 @@ if not currentGameSupported then
     listPadding.Parent = list
 
     local listLayout = Instance.new("UIListLayout")
-    listLayout.Padding = UDim.new(0, 9)
+    listLayout.Padding = UDim.new(0, 8)
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
     listLayout.Parent = list
 
@@ -412,7 +412,7 @@ if not currentGameSupported then
     for index, gameInfo in ipairs(SUPPORTED_GAMES) do
         local card = Instance.new("Frame")
         card.Name = "Game_" .. tostring(gameInfo.PlaceId)
-        card.Size = UDim2.new(1, -4, 0, 86)
+        card.Size = UDim2.new(1, -4, 0, 64)
         card.BackgroundColor3 = Color3.fromRGB(40, 38, 57)
         card.BorderSizePixel = 0
         card.LayoutOrder = index
@@ -421,8 +421,8 @@ if not currentGameSupported then
 
         local icon = Instance.new("ImageLabel")
         icon.Name = "GameIcon"
-        icon.Position = UDim2.fromOffset(10, 10)
-        icon.Size = UDim2.fromOffset(66, 66)
+        icon.Position = UDim2.fromOffset(10, 12)
+        icon.Size = UDim2.fromOffset(40, 40)
         icon.BackgroundColor3 = Color3.fromRGB(23, 23, 34)
         icon.BorderSizePixel = 0
         icon.Image = gameInfo.Icon
@@ -432,38 +432,38 @@ if not currentGameSupported then
 
         local gameName = Instance.new("TextLabel")
         gameName.Name = "GameName"
-        gameName.Position = UDim2.fromOffset(88, 15)
-        gameName.Size = UDim2.new(1, -200, 0, 25)
+        gameName.Position = UDim2.fromOffset(62, 8)
+        gameName.Size = UDim2.new(1, -190, 0, 20)
         gameName.BackgroundTransparency = 1
         gameName.Text = gameInfo.Name
         gameName.TextColor3 = Color3.fromRGB(235, 230, 255)
         gameName.Font = Enum.Font.GothamBold
-        gameName.TextSize = 14
+        gameName.TextSize = 13
         gameName.TextXAlignment = Enum.TextXAlignment.Left
         gameName.TextTruncate = Enum.TextTruncate.AtEnd
         gameName.Parent = card
 
         local gameId = Instance.new("TextLabel")
-        gameId.Position = UDim2.fromOffset(88, 42)
-        gameId.Size = UDim2.new(1, -200, 0, 20)
+        gameId.Position = UDim2.fromOffset(62, 29)
+        gameId.Size = UDim2.new(1, -190, 0, 16)
         gameId.BackgroundTransparency = 1
         gameId.Text = "Place ID: " .. tostring(gameInfo.PlaceId)
         gameId.TextColor3 = Color3.fromRGB(145, 145, 165)
         gameId.Font = Enum.Font.Gotham
-        gameId.TextSize = 10
+        gameId.TextSize = 9
         gameId.TextXAlignment = Enum.TextXAlignment.Left
         gameId.Parent = card
 
         local joinButton = Instance.new("TextButton")
         joinButton.Name = "JoinButton"
         joinButton.AnchorPoint = Vector2.new(1, 0.5)
-        joinButton.Position = UDim2.new(1, -12, 0.5, 0)
-        joinButton.Size = UDim2.fromOffset(82, 36)
+        joinButton.Position = UDim2.new(1, -10, 0.5, 0)
+        joinButton.Size = UDim2.fromOffset(80, 30)
         joinButton.BackgroundColor3 = Color3.fromRGB(90, 65, 175)
         joinButton.Text = "JOIN"
         joinButton.TextColor3 = Color3.new(1, 1, 1)
         joinButton.Font = Enum.Font.GothamBold
-        joinButton.TextSize = 12
+        joinButton.TextSize = 11
         joinButton.BorderSizePixel = 0
         joinButton.AutoButtonColor = false
         joinButton.Parent = card
@@ -472,8 +472,8 @@ if not currentGameSupported then
         local openButton = Instance.new("TextButton")
         openButton.Name = "OpenButton"
         openButton.AnchorPoint = Vector2.new(1, 0.5)
-        openButton.Position = UDim2.new(1, -100, 0.5, 0)
-        openButton.Size = UDim2.fromOffset(36, 36)
+        openButton.Position = UDim2.new(1, -96, 0.5, 0)
+        openButton.Size = UDim2.fromOffset(30, 30)
         openButton.BackgroundColor3 = Color3.fromRGB(55, 52, 78)
         openButton.Text = "↗"
         openButton.TextColor3 = Color3.fromRGB(190, 160, 255)
